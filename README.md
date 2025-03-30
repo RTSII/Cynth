@@ -48,5 +48,5 @@ CynthAI is a Progressive Web App (PWA) that provides a structured, year-long pro
 
 ```bash
 git clone https://github.com/RTSII/cynthai.git
-# Replace 'RTSII' with the correct GitHub username or repository owner.
 cd cynthai
+```

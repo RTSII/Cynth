@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "CynthAI",
+			"path": "../../../CynthAI/CynthAI"
+		}
+	],
+	"settings": {
+		"files.autoSave": "afterDelay"
+	}
+}

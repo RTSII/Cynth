@@ -37,15 +37,15 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     // Base classes that apply to all cards
     const baseClasses = 'rounded-xl overflow-hidden';
-    
+
     // Interactive hover and focus states
     const interactiveClasses = isInteractive
       ? 'hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-shadow duration-200 cursor-pointer'
       : '';
-    
+
     // Width classes
     const widthClasses = isFullWidth ? 'w-full' : '';
-    
+
     // Combine classes based on props
     const cardClasses = [
       baseClasses,
@@ -109,18 +109,17 @@ const CardDescription = ({
   </p>
 );
 
-const CardContent = ({
+export const CardContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className = '',
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={className}
-    {...props}
-  >
-    {children}
-  </div>
-);
+}) => {
+  return (
+    <div className={`p-6 ${className}`} {...props}>
+      {children}
+    </div>
+  );
+};
 
 const CardFooter = ({
   className = '',
@@ -159,7 +158,6 @@ export {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardContent,
   CardFooter,
   CardImage,
 };

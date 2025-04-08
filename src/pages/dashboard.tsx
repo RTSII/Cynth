@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Calendar, Clock, Award, ArrowRight, PlayCircle } from 'lucide-react';
 
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
-import Button from '../components/ui/Button';
+import { Button } from '../components/ui/button';
 import CircularProgress from '../components/ui/CircularProgress';
 
 import { useUser } from '../contexts/UserContext';
@@ -15,27 +15,27 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { progress, getCurrentStreak, getTotalPracticeMinutes } = useProgress();
-  
+
   const [greeting, setGreeting] = useState<string>('');
   const [todayDate, setTodayDate] = useState<string>('');
-  
+
   // Get today's exercise info if available
   const chairYogaProgramId = user.selectedPrograms.chairYoga;
   const taiChiProgramId = user.selectedPrograms.taiChi;
-  
+
   const chairYogaProgram = chairYogaProgramId ? getProgramById(chairYogaProgramId) : null;
   const taiChiProgram = taiChiProgramId ? getProgramById(taiChiProgramId) : null;
-  
+
   // Calculate current streak
   const currentStreak = getCurrentStreak();
   const totalMinutes = getTotalPracticeMinutes();
-  
+
   // Set greeting based on time of day
   useEffect(() => {
     const setAppropriateGreeting = () => {
       const now = new Date();
       const hour = now.getHours();
-      
+
       let greetingText = '';
       if (hour < 12) {
         greetingText = 'Good Morning';
@@ -44,34 +44,34 @@ const Dashboard: React.FC = () => {
       } else {
         greetingText = 'Good Evening';
       }
-      
+
       setGreeting(`${greetingText}, ${user.name}`);
       setTodayDate(format(now, 'EEEE, MMMM d'));
     };
-    
+
     setAppropriateGreeting();
-    
+
     // Update date every minute
     const interval = setInterval(setAppropriateGreeting, 60000);
-    
+
     return () => clearInterval(interval);
   }, [user.name]);
-  
+
   // Handle navigation to today's practice
   const handleStartPractice = () => {
     navigate('/today');
   };
-  
+
   // Handle navigation to programs
   const handleBrowsePrograms = () => {
     navigate('/programs');
   };
-  
+
   // Get latest achievement if there is one
   const latestAchievement = progress.achievements.length > 0
     ? progress.achievements[progress.achievements.length - 1]
     : null;
-  
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -79,7 +79,7 @@ const Dashboard: React.FC = () => {
         <h1 className="text-2xl font-bold text-neutral-800">{greeting}</h1>
         <p className="text-neutral-600">{todayDate}</p>
       </div>
-      
+
       {/* Today's Practice Card */}
       <Card variant="elevated">
         <CardHeader>
@@ -104,7 +104,7 @@ const Dashboard: React.FC = () => {
                   </Button>
                 </div>
               )}
-              
+
               {taiChiProgram && (
                 <div className="flex items-center justify-between">
                   <div>
@@ -136,7 +136,7 @@ const Dashboard: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
+
       {/* Progress Stats */}
       <div className="grid grid-cols-2 gap-4">
         <Card>
@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col items-center">
@@ -159,7 +159,7 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Monthly Progress */}
       <Card>
         <CardHeader>
@@ -175,7 +175,7 @@ const Dashboard: React.FC = () => {
           />
         </CardContent>
       </Card>
-      
+
       {/* Latest Achievement */}
       {latestAchievement && (
         <Card variant="elevated" className="bg-gradient-to-r from-primary-50 to-secondary-50">
@@ -202,7 +202,7 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
       )}
-      
+
       {/* Quick Access */}
       <div>
         <h2 className="text-xl font-semibold mb-3">Quick Access</h2>
@@ -210,17 +210,17 @@ const Dashboard: React.FC = () => {
           <Button
             variant="outline"
             size="lg"
-            isFullWidth
+            fullWidth
             rightIcon={<ArrowRight className="w-5 h-5" />}
             onClick={() => navigate('/programs')}
           >
             All Programs
           </Button>
-          
+
           <Button
             variant="outline"
             size="lg"
-            isFullWidth
+            fullWidth
             rightIcon={<ArrowRight className="w-5 h-5" />}
             onClick={() => navigate('/inspiration')}
           >

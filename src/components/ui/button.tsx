@@ -4,14 +4,11 @@ import { LucideIcon } from 'lucide-react';
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
-  icon?: LucideIcon;
-  iconPosition?: 'left' | 'right';
-  isLoading?: boolean;
+  rightIcon?: React.ReactNode;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -28,14 +25,14 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   // Base classes
   const baseClasses = 'rounded-lg font-medium transition-colors inline-flex items-center justify-center';
-  
+
   // Size classes
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2',
     lg: 'px-6 py-3 text-lg',
   };
-  
+
   // Variant classes
   const variantClasses = {
     primary: 'bg-primary-500 text-white hover:bg-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50',
@@ -44,13 +41,13 @@ const Button: React.FC<ButtonProps> = ({
     danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:ring-opacity-50',
     success: 'bg-green-500 text-white hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50',
   };
-  
+
   // Disabled classes
   const disabledClasses = 'opacity-50 cursor-not-allowed';
-  
+
   // Width classes
   const widthClasses = fullWidth ? 'w-full' : '';
-  
+
   // Combine classes
   const buttonClasses = `
     ${baseClasses}
@@ -60,7 +57,7 @@ const Button: React.FC<ButtonProps> = ({
     ${widthClasses}
     ${className}
   `;
-  
+
   return (
     <button
       className={buttonClasses}
@@ -72,13 +69,13 @@ const Button: React.FC<ButtonProps> = ({
           <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
         </div>
       )}
-      
+
       {Icon && iconPosition === 'left' && !isLoading && (
         <Icon size={size === 'sm' ? 16 : size === 'lg' ? 24 : 20} className="mr-2" />
       )}
-      
+
       {children}
-      
+
       {Icon && iconPosition === 'right' && !isLoading && (
         <Icon size={size === 'sm' ? 16 : size === 'lg' ? 24 : 20} className="ml-2" />
       )}

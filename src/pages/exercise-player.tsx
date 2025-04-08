@@ -14,8 +14,8 @@ import { Exercise, ProgramDay } from '@/types';
 import { getExerciseData, getProgramDay } from '@/data/programs';
 
 // VideoPlayer component
-const VideoPlayer: React.FC<{ 
-  videoUrl: string; 
+const VideoPlayer: React.FC<{
+  videoUrl: string;
   onEnded: () => void;
   isPlaying: boolean;
   onPlayPause: () => void;
@@ -23,12 +23,12 @@ const VideoPlayer: React.FC<{
   const [isYouTube, setIsYouTube] = useState(false);
   const [youtubeId, setYoutubeId] = useState('');
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  
+
   useEffect(() => {
     // Check if URL is YouTube
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = videoUrl.match(youtubeRegex);
-    
+
     if (match && match[1]) {
       setIsYouTube(true);
       setYoutubeId(match[1]);
@@ -49,7 +49,7 @@ const VideoPlayer: React.FC<{
       }
     }
   }, [isPlaying, isYouTube]);
-  
+
   if (isYouTube) {
     // YouTube embed with playback control
     return (
@@ -62,9 +62,9 @@ const VideoPlayer: React.FC<{
           allowFullScreen
           title="Exercise Video"
         ></iframe>
-        
+
         {/* Custom play/pause overlay for YouTube */}
-        <div 
+        <div
           className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-10"
           style={{ display: isPlaying ? 'none' : 'flex' }}
           onClick={onPlayPause}
@@ -90,9 +90,9 @@ const VideoPlayer: React.FC<{
           onEnded={onEnded}
           playsInline
         ></video>
-        
+
         {/* Play/pause overlay */}
-        <div 
+        <div
           className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-10"
           style={{ display: isPlaying ? 'none' : 'flex' }}
           onClick={onPlayPause}
@@ -111,12 +111,17 @@ const VideoPlayer: React.FC<{
 };
 
 // Main ExercisePlayer component
-const ExercisePlayer: React.FC = () => {
+import { Exercise } from '../types/exercise.types';
+
+interface ExercisePlayerProps {
+  exercise: Exercise;
+}
+
+const ExercisePlayer: React.FC<ExercisePlayerProps> = ({ exercise }) => {
   const { programId, dayId, exerciseId } = useParams();
   const navigate = useNavigate();
   const { completeExercise } = useProgress();
-  
-  const [exercise, setExercise] = useState<Exercise | null>(null);
+
   const [programDay, setProgramDay] = useState<ProgramDay | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -124,7 +129,7 @@ const ExercisePlayer: React.FC = () => {
   const [rating, setRating] = useState(0);
   const [activeTab, setActiveTab] = useState<'instructions' | 'benefits' | 'modifications'>('instructions');
   const [currentModification, setCurrentModification] = useState<string | null>(null);
-  
+
   // Load exercise data
   useEffect(() => {
     const loadExerciseData = async () => {
@@ -132,17 +137,10 @@ const ExercisePlayer: React.FC = () => {
         navigate('/today');
         return;
       }
-      
+
       try {
         setLoading(true);
-        
-        // Get exercise data
-        const exerciseData = getExerciseData(exerciseId);
-        if (!exerciseData) {
-          throw new Error('Exercise not found');
-        }
-        setExercise(exerciseData);
-        
+
         // Get program day data for navigation between exercises
         const day = getProgramDay(programId, dayId);
         if (day) {
@@ -155,30 +153,30 @@ const ExercisePlayer: React.FC = () => {
         setLoading(false);
       }
     };
-    
+
     loadExerciseData();
   }, [programId, dayId, exerciseId, navigate]);
-  
+
   // Handle video playback control
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
-  
+
   // Handle video ended
   const handleVideoEnded = () => {
     setIsPlaying(false);
     setIsCompleted(true);
   };
-  
+
   // Handle rating selection
   const handleRating = (value: number) => {
     setRating(value);
   };
-  
+
   // Handle exercise completion
   const handleComplete = async () => {
     if (!exercise || !programId || !dayId) return;
-    
+
     try {
       // Create completion data
       const completionData = {
@@ -190,27 +188,27 @@ const ExercisePlayer: React.FC = () => {
         duration: exercise.duration,
         rating: rating > 0 ? rating : 5, // Default to 5 if not rated
       };
-      
+
       // Save completion
       await completeExercise(completionData);
-      
+
       // Navigate to the next exercise or back to today
       navigateAfterCompletion();
     } catch (error) {
       console.error('Error completing exercise:', error);
     }
   };
-  
+
   // Navigate to next exercise or back to today
   const navigateAfterCompletion = () => {
     if (!programDay) {
       navigate('/today');
       return;
     }
-    
+
     // Find current exercise index
     const currentIndex = programDay.exercises.findIndex(e => e.id === exerciseId);
-    
+
     // If there's a next exercise, navigate to it
     if (currentIndex < programDay.exercises.length - 1) {
       const nextExercise = programDay.exercises[currentIndex + 1];
@@ -220,12 +218,12 @@ const ExercisePlayer: React.FC = () => {
       navigate('/today');
     }
   };
-  
+
   // Exit exercise player
   const handleExit = () => {
     navigate('/today');
   };
-  
+
   // Toggle modification details
   const toggleModification = (modId: string) => {
     if (currentModification === modId) {
@@ -234,7 +232,7 @@ const ExercisePlayer: React.FC = () => {
       setCurrentModification(modId);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900">
@@ -242,7 +240,7 @@ const ExercisePlayer: React.FC = () => {
       </div>
     );
   }
-  
+
   if (!exercise) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
@@ -253,38 +251,38 @@ const ExercisePlayer: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Video section */}
       <div className="relative bg-black">
         {/* Exit button */}
-        <button 
+        <button
           className="absolute top-4 left-4 z-20 bg-black bg-opacity-50 text-white p-2 rounded-full"
           onClick={handleExit}
         >
           <X size={24} />
         </button>
-        
+
         <div className="relative pt-[56.25%]"> {/* 16:9 aspect ratio */}
           {exercise.videoUrl && (
-            <VideoPlayer 
-              videoUrl={exercise.videoUrl} 
+            <VideoPlayer
+              videoUrl={exercise.videoUrl}
               onEnded={handleVideoEnded}
               isPlaying={isPlaying}
               onPlayPause={handlePlayPause}
             />
           )}
         </div>
-        
+
         {/* Completion overlay */}
         {isCompleted && (
           <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center p-6 z-30">
             <Card padding="lg" className="w-full max-w-md text-center">
               <h3 className="text-xl font-bold mb-4">Great Job!</h3>
-              
+
               <p className="text-center mb-6">How was this exercise?</p>
-              
+
               <div className="flex justify-center mb-6">
                 {[1, 2, 3, 4, 5].map(value => (
                   <button
@@ -294,16 +292,15 @@ const ExercisePlayer: React.FC = () => {
                   >
                     <Star
                       size={32}
-                      className={`${
-                        value <= rating 
-                          ? 'text-yellow-400 fill-yellow-400' 
-                          : 'text-gray-300'
-                      }`}
+                      className={`${value <= rating
+                        ? 'text-yellow-400 fill-yellow-400'
+                        : 'text-gray-300'
+                        }`}
                     />
                   </button>
                 ))}
               </div>
-              
+
               <Button
                 variant="primary"
                 fullWidth
@@ -316,12 +313,12 @@ const ExercisePlayer: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Exercise information section */}
       <div className="flex-1 overflow-auto">
         <div className="p-4">
           <h1 className="text-2xl font-bold mb-1">{exercise.title}</h1>
-          
+
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="badge bg-blue-100 text-blue-800">
               {exercise.type}
@@ -333,45 +330,42 @@ const ExercisePlayer: React.FC = () => {
               {exercise.difficulty}
             </span>
           </div>
-          
+
           <p className="text-gray-700 mb-4">{exercise.description}</p>
-          
+
           {/* Tabs */}
           <div className="border-b border-gray-200 mb-4">
             <div className="flex">
               <button
-                className={`px-4 py-2 font-medium ${
-                  activeTab === 'instructions' 
-                    ? 'text-primary-600 border-b-2 border-primary-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-4 py-2 font-medium ${activeTab === 'instructions'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 onClick={() => setActiveTab('instructions')}
               >
                 Instructions
               </button>
               <button
-                className={`px-4 py-2 font-medium ${
-                  activeTab === 'benefits' 
-                    ? 'text-primary-600 border-b-2 border-primary-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-4 py-2 font-medium ${activeTab === 'benefits'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 onClick={() => setActiveTab('benefits')}
               >
                 Benefits
               </button>
               <button
-                className={`px-4 py-2 font-medium ${
-                  activeTab === 'modifications' 
-                    ? 'text-primary-600 border-b-2 border-primary-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`px-4 py-2 font-medium ${activeTab === 'modifications'
+                  ? 'text-primary-600 border-b-2 border-primary-600'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 onClick={() => setActiveTab('modifications')}
               >
                 Modifications
               </button>
             </div>
           </div>
-          
+
           {/* Tab content */}
           <div>
             {activeTab === 'instructions' && (
@@ -392,7 +386,7 @@ const ExercisePlayer: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'benefits' && (
               <div>
                 <h2 className="text-lg font-semibold mb-2">Benefits:</h2>
@@ -403,27 +397,26 @@ const ExercisePlayer: React.FC = () => {
                 </ul>
               </div>
             )}
-            
+
             {activeTab === 'modifications' && (
               <div>
                 <h2 className="text-lg font-semibold mb-2">Available Modifications:</h2>
                 {exercise.modifications.map(modification => (
-                  <div 
+                  <div
                     key={modification.id}
                     className="p-4 border border-gray-200 rounded-lg mb-3 hover:border-primary-300 cursor-pointer"
                     onClick={() => toggleModification(modification.id)}
                   >
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium">{modification.title}</h3>
-                      <ChevronRight 
-                        size={20} 
-                        className={`text-primary-500 transition-transform ${
-                          currentModification === modification.id ? 'rotate-90' : ''
-                        }`} 
+                      <ChevronRight
+                        size={20}
+                        className={`text-primary-500 transition-transform ${currentModification === modification.id ? 'rotate-90' : ''
+                          }`}
                       />
                     </div>
                     <p className="text-sm text-gray-600">For: {modification.forCondition}</p>
-                    
+
                     {currentModification === modification.id && (
                       <div className="mt-3 pt-3 border-t border-gray-100">
                         <p className="mb-2 text-gray-700">{modification.description}</p>
@@ -441,7 +434,7 @@ const ExercisePlayer: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Playback controls */}
       <div className="bg-white border-t border-gray-200 p-4 flex justify-center">
         <Button

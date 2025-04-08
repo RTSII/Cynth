@@ -1,4 +1,5 @@
 import { Program, ProgramDay, Exercise } from '../types';
+import { Exercise, ExerciseType, Difficulty } from '../types/exercise.types';
 
 // Sample program data for CynthAI
 export const programs: Program[] = [
@@ -626,7 +627,7 @@ export const getProgramData = (programId: string): Program | null => {
 export const getProgramDay = (programId: string, dayId: string): ProgramDay | null => {
   const program = getProgramData(programId);
   if (!program) return null;
-  
+
   return program.days.find(day => day.id === dayId) || null;
 };
 
@@ -655,21 +656,21 @@ export const getProgramsByLevel = (level: 'Novice' | 'Active' | 'Advanced'): Pro
 export const getSuggestedNextProgram = (currentProgramId: string): Program | null => {
   const currentProgram = getProgramData(currentProgramId);
   if (!currentProgram) return null;
-  
+
   // Get programs of same category but next level or month
-  let suggestedPrograms = programs.filter(program => 
-    program.category === currentProgram.category && 
+  let suggestedPrograms = programs.filter(program =>
+    program.category === currentProgram.category &&
     ((program.level === currentProgram.level && program.month > currentProgram.month) ||
-     (getLevelValue(program.level) > getLevelValue(currentProgram.level) && program.month === 1))
+      (getLevelValue(program.level) > getLevelValue(currentProgram.level) && program.month === 1))
   );
-  
+
   // Sort by level first, then month
   suggestedPrograms.sort((a, b) => {
     const levelDiff = getLevelValue(a.level) - getLevelValue(b.level);
     if (levelDiff !== 0) return levelDiff;
     return a.month - b.month;
   });
-  
+
   return suggestedPrograms[0] || null;
 };
 
@@ -682,3 +683,20 @@ const getLevelValue = (level: 'Novice' | 'Active' | 'Advanced'): number => {
     default: return 0;
   }
 };
+
+export const exerciseData: Exercise[] = [
+  {
+    id: '1',
+    type: ExerciseType.YOGA,
+    difficulty: Difficulty.BEGINNER,
+    videoAsset: {
+      videoUrl: 'https://example.com/video1.mp4',
+      thumbnailUrl: 'https://example.com/thumb1.jpg',
+      duration: 300,
+      quality: 'HD'
+    },
+    holdTime: 30,
+    repetitions: 3
+  }
+  // ...add more exercises...
+];

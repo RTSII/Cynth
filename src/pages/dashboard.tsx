@@ -167,7 +167,7 @@ const Dashboard: React.FC = () => {
         </CardHeader>
         <CardContent className="flex justify-center">
           <CircularProgress
-            value={15} // This should be calculated based on actual monthly progress
+            value={(progress.monthlyMinutes / progress.monthlyGoal) * 100 || 0} // Dynamically calculate monthly progress
             size="lg"
             thickness="thick"
             label="Completed"

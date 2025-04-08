@@ -71,6 +71,9 @@ cynthai/
 ├── tailwind.config.js
 ├── vite.config.ts
 ├── tsconfig.json
+<<<<<<< HEAD
 ├── tsconfig.node.json
+=======
+>>>>>>> 56360646f92426441bd53b9be28d308739174b72
 └── README.md
 ```

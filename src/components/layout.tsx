@@ -11,19 +11,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useUser();
-  
+
   const [showHelp, setShowHelp] = useState<boolean>(false);
-  
+
+  type TextSizeOption = 'normal' | 'large' | 'extraLarge';
+
   // Apply text size from user preferences
-  const textSizeClasses = {
+  const textSizeClasses: Record<TextSizeOption, string> = {
     normal: '',
     large: 'text-lg',
     extraLarge: 'text-xl',
   };
-  
+
   // Apply high contrast if in user preferences
   const highContrastClass = user.preferences.highContrast ? 'high-contrast' : '';
-  
+
   // Navigation items
   const navItems = [
     { path: '/', label: 'Home', icon: <Home className="w-6 h-6" /> },
@@ -33,17 +35,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: '/music', label: 'Music', icon: <Music className="w-6 h-6" /> },
     { path: '/settings', label: 'Settings', icon: <Settings className="w-6 h-6" /> },
   ];
-  
+
   // Handle navigation
   const handleNavigate = (path: string) => {
     navigate(path);
   };
-  
+
   // Toggle help overlay
   const toggleHelp = () => {
     setShowHelp(!showHelp);
   };
-  
+
   // Listen for Escape key to close help overlay
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,9 +53,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         setShowHelp(false);
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -65,14 +67,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header className="bg-white border-b border-neutral-200 py-4 px-4 sm:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <img 
-              src="/assets/icons/logo.svg" 
-              alt="CynthAI" 
+            <img
+              src="/assets/icons/logo.svg"
+              alt="CynthAI"
               className="h-8 w-auto"
             />
             <h1 className="ml-2 text-xl font-semibold text-primary-900">CynthAI</h1>
           </div>
-          
+
           <button
             onClick={toggleHelp}
             className="p-2 text-neutral-600 hover:text-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full"
@@ -82,18 +84,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </button>
         </div>
       </header>
-      
+
       {/* Main Content */}
       <main className="flex-1 px-4 sm:px-6 py-6 overflow-auto">
         {children}
       </main>
-      
+
       {/* Bottom Navigation */}
       <nav className="bg-white border-t border-neutral-200 pt-2 pb-safe">
         <div className="flex justify-around">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
-            
+
             return (
               <button
                 key={item.path}
@@ -113,13 +115,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           })}
         </div>
       </nav>
-      
+
       {/* Help Overlay */}
       {showHelp && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 max-h-[80vh] overflow-auto">
             <h2 className="text-2xl font-semibold mb-4">Help & Information</h2>
-            
+
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-2">Getting Around</h3>
               <ul className="space-y-2">
@@ -149,7 +151,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </li>
               </ul>
             </div>
-            
+
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-2">Exercise Controls</h3>
               <ul className="space-y-2">
@@ -158,12 +160,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <li><strong>Fullscreen:</strong> Tap the fullscreen button for a larger view</li>
               </ul>
             </div>
-            
+
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-2">Need More Help?</h3>
               <p>Contact your caregiver or family member for assistance with the app.</p>
             </div>
-            
+
             <button
               onClick={toggleHelp}
               className="w-full bg-primary-500 text-white py-3 px-4 rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"

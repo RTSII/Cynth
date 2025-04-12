@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import authService from '@/services/authService'; // Import the auth service
 
 export interface UserPreferences {
   reminderTime: string;
@@ -34,6 +35,7 @@ const defaultUserProfile: UserProfile = {
   level: 'Novice',
   startDate: new Date().toISOString(),
   healthConditions: [],
+  username: 'Cynthia',
   goals: [
     {
       id: '1',
@@ -66,7 +68,7 @@ const defaultUserProfile: UserProfile = {
 };
 
 type UserContextType = {
-  userProfile: UserProfile | null;
+  userProfile: UserProfile | null; // This will now hold the logged-in user
   isOnboarded: boolean;
   updateUserProfile: (profile: Partial<UserProfile>) => Promise<void>;
   updatePreferences: (preferences: Partial<UserPreferences>) => Promise<void>;
@@ -84,8 +86,11 @@ export const useUser = (): UserContextType => {
   return context;
 };
 
+interface User {
+  username: string;
+}
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<User | null>(null); // Use a simple User interface
   const [isOnboarded, setIsOnboarded] = useState(false);
 
   // Load user data on mount
@@ -96,14 +101,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsOnboarded(onboardedStatus === 'true');
 
         const profile = localStorage.getItem('@cynthai_user_profile');
+        // Initialize with default profile if none exists and onboarded
+        let userProfile: UserProfile | null = profile ? JSON.parse(profile) : (onboardedStatus === 'true' ? defaultUserProfile : null);
 
-        if (profile) {
-          setUserProfile(JSON.parse(profile));
-        } else if (onboardedStatus === 'true') {
-          await saveUserProfile(defaultUserProfile);
-          setUserProfile(defaultUserProfile);
-        }
-
+        setUser(userProfile ? { username: userProfile.username } : null); // Set initial user
+        // Also save default profile if not present and onboarded
         if (profile) {
           const userProfile = JSON.parse(profile) as UserProfile;
           applyAccessibilitySettings(userProfile.preferences);
@@ -145,7 +147,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateUserProfile = async (profile: Partial<UserProfile>) => {
     try {
-      if (!userProfile) return;
+      if (!user) return;
 
       const updatedProfile = {
         ...userProfile,
@@ -153,7 +155,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       await saveUserProfile(updatedProfile);
-      setUserProfile(updatedProfile);
+      setUser(updatedProfile);
     } catch (error) {
       console.error('Error updating user profile:', error);
       throw error;
@@ -162,7 +164,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updatePreferences = async (preferences: Partial<UserPreferences>) => {
     try {
-      if (!userProfile) return;
+      if (!user) return;
 
       const updatedProfile = {
         ...userProfile,
@@ -173,7 +175,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       await saveUserProfile(updatedProfile);
-      setUserProfile(updatedProfile);
+      setUser(updatedProfile);
       applyAccessibilitySettings(updatedProfile.preferences);
     } catch (error) {
       console.error('Error updating preferences:', error);
@@ -187,8 +189,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsOnboarded(true);
 
       if (!userProfile) {
-        await saveUserProfile(defaultUserProfile);
-        setUserProfile(defaultUserProfile);
+        //await saveUserProfile(defaultUserProfile);
+        //setUser(defaultUserProfile);
         applyAccessibilitySettings(defaultUserProfile.preferences);
       }
     } catch (error) {
@@ -202,11 +204,42 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.removeItem('@cynthai_onboarded');
       localStorage.removeItem('@cynthai_user_profile');
       setIsOnboarded(false);
-      setUserProfile(null);
+      setUser(null);
       document.body.classList.remove('text-base-large', 'text-lg', 'high-contrast');
     } catch (error) {
       console.error('Error resetting profile:', error);
       throw error;
+    }
+  };
+
+  const login = async (username: string, password: string) => {
+    try {
+      const success = await authService.login(username, password);
+      if (success) {
+        // In a real app, get the user profile from the backend
+        const userProfile: UserProfile = {
+          ...defaultUserProfile,
+          username,
+        };
+        await saveUserProfile(userProfile);
+        setUser({ username });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+      setUser(null);
+      localStorage.removeItem('@cynthai_user_profile'); // Clear profile on logout
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Handle logout error if needed
     }
   };
 
@@ -217,6 +250,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updatePreferences,
     completeOnboarding,
     resetProfile,
+    login,
+    logout,
   };
 
   return (

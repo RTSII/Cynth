@@ -1,6 +1,5 @@
 import { UIPreferences } from '../types';
-import { useEffect, useCallback } from 'react';
-import React, { useState, createContext, useContext } from 'react';
+import { useEffect, createContext, useContext, useRef, useState, useCallback } from 'react';
 import { logEvent, AnalyticsEvent } from '../utils/analytics';
 
 // Types for announcements
@@ -153,6 +152,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     );
 };
 
+// This component announces the progress of an action to screen readers.
 // Progress announcer component
 interface ProgressAnnouncerProps {
     value: number;
@@ -168,7 +168,7 @@ export const ProgressAnnouncer: React.FC<ProgressAnnouncerProps> = ({
     announceEvery = 25
 }) => {
     const { announce } = useAnnouncer();
-    const previousValueRef = React.useRef(value);
+    const previousValueRef = useRef(value);
 
     useEffect(() => {
         const previousPercentage = Math.floor((previousValueRef.current / max) * 100);
@@ -179,6 +179,7 @@ export const ProgressAnnouncer: React.FC<ProgressAnnouncerProps> = ({
         const currentThreshold = Math.floor(currentPercentage / announceEvery);
 
         if (currentThreshold !== previousThreshold) {
+            // Announce the current progress percentage
             announce(`${label}: ${currentPercentage}% complete`);
         }
 
@@ -233,7 +234,7 @@ export function useAccessibility(preferences: UIPreferences) {
     const getConfigFromPreferences = (prefs: UIPreferences): AccessibilityConfig => ({
         textSize: prefs.textSize === 'normal' ? 1 : prefs.textSize === 'large' ? 1.2 : 1.4,
         highContrast: prefs.highContrast,
-        reducedMotion: prefs.reducedMotion,
+        reducedMotion: prefs.reducedMotion,        
         audioFeedback: prefs.audioFeedback,
     });
 
@@ -246,23 +247,25 @@ export function useAccessibility(preferences: UIPreferences) {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const prefersHighContrast = window.matchMedia('(prefers-contrast: more)');
 
+        let newConfig: AccessibilityConfig = { ...config };
+
         if (prefersReducedMotion.matches && !preferences.reducedMotion) {
-            config.reducedMotion = true;
-            applyAccessibilitySettings(config);
+            newConfig.reducedMotion = true;
         }
 
         if (prefersHighContrast.matches && !preferences.highContrast) {
-            config.highContrast = true;
-            applyAccessibilitySettings(config);
+            newConfig.highContrast = true;
         }
 
+        applyAccessibilitySettings(newConfig);
+
         const handleReducedMotionChange = (e: MediaQueryListEvent) => {
-            config.reducedMotion = e.matches;
-            applyAccessibilitySettings(config);
+            newConfig = { ...newConfig, reducedMotion: e.matches };
+            applyAccessibilitySettings(newConfig);
         };
 
         const handleHighContrastChange = (e: MediaQueryListEvent) => {
-            config.highContrast = e.matches;
+            newConfig = { ...newConfig, highContrast: e.matches };
             applyAccessibilitySettings(config);
         };
 
@@ -277,24 +280,19 @@ export function useAccessibility(preferences: UIPreferences) {
 }
 
 // Announce messages to screen readers
-export function announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite') {
-    const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', priority);
-    announcement.setAttribute('aria-atomic', 'true');
-    announcement.classList.add('sr-only'); // visually hidden
-    document.body.appendChild(announcement);
+export function announceToScreenReader(message: string, priority: AnnouncementPolite = 'polite') {
+    const announcer = useAnnouncer();
 
-    // Use setTimeout to ensure the DOM update and announcement
-    setTimeout(() => {
-        announcement.textContent = message;
-        setTimeout(() => {
-            document.body.removeChild(announcement);
-        }, 1000);
-    }, 50);
+    if (announcer && announcer.announce) {
+        announcer.announce(message, priority);
+    } else {
+        console.warn('Announcer context not available. Cannot announce:', message);
+    }
 }
 
 // Handle keyboard navigation
 export function handleKeyboardNavigation(e: KeyboardEvent) {
+    // No event listeners are added in this function.
     // Skip to main content
     if (e.key === 'Enter' && e.altKey) {
         e.preventDefault();
@@ -347,6 +345,7 @@ export function createAccessibleButtonProps({ onClick, label, description }: Acc
 
 const RatingStars: React.FC<{ rating: number }> = ({ rating }) => {
     return (
+
         <div className="rating-container" role="group" aria-label="Exercise Rating"></div>
             {
         [1, 2, 3, 4, 5].map((star) => (
@@ -362,5 +361,10 @@ const RatingStars: React.FC<{ rating: number }> = ({ rating }) => {
         ))
     }
         </div >
+
     );
 };
+
+function handleRating(exerciseId: string, rating: number) {
+    console.log(`Exercise ${exerciseId} rated with ${rating}`);
+}

@@ -12,7 +12,7 @@ All CynthAI content adheres to five core principles:
 
 3. **Inclusive and Accessible**: All content accommodates various ability levels and offers modifications for different needs.
 
-4. **Clear and Comprehensible**: Instructions use simple language and visual demonstrations that are easy to follow.
+4. **Clear and Comprehensible**: Instructions use proper anatomical and medical terms.
 
 5. **Progressive and Empowering**: Content builds skills systematically and emphasizes positive reinforcement.
 
@@ -528,7 +528,7 @@ const ExerciseTimer = ({ duration, onComplete }) => {
 ### Cognitive Accessibility
 
 #### Content Simplicity
-- **Clear Language**: Simple, direct language (6th-8th grade reading level)
+- **Proper Language**: Standard Anatomical and Medical names/terminology used when describing the poses and their instructions as it relates to the body. Don't dumb down info. as (Cynthia (user) has decades of Medical experience and knowledge)
 - **Chunked Information**: Content divided into manageable sections
 - **Consistent Layout**: Predictable placement of navigation and controls
 - **Progressive Disclosure**: Information revealed as needed, not all at once

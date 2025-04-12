@@ -42,7 +42,7 @@ export const inspirationItems: InspirationItem[] = [
     description: 'Balanced stones in a peaceful zen garden setting.',
     tags: ['Zen', 'Balance', 'Mindfulness']
   },
-
+  
   // Videos
   {
     id: 'ins-vid-1',
@@ -71,7 +71,7 @@ export const inspirationItems: InspirationItem[] = [
     description: 'Relax to the rhythmic sounds and sight of ocean waves on a peaceful beach.',
     tags: ['Ocean', 'Relaxation', 'Sound']
   },
-
+  
   // Quotes
   {
     id: 'ins-quote-1',
@@ -159,16 +159,4 @@ export const getInspirationByTag = (tag: string): InspirationItem[] => {
 export const getRandomInspirationItem = (): InspirationItem => {
   const randomIndex = Math.floor(Math.random() * inspirationItems.length);
   return inspirationItems[randomIndex];
-};
-
-// Add this function to get quotes specifically
-export const getInspirationQuotes = (): InspirationItem[] => {
-  return getInspirationByType('quote');
-};
-
-// Use this instead of exporting inspirationalQuotes
-export const getRandomQuote = (): InspirationItem => {
-  const quotes = getInspirationQuotes();
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  return quotes[randomIndex];
 };

@@ -15,11 +15,10 @@ CynthAI is a personalized chair yoga and tai chi web application designed specif
 - **Video-Based Exercises**: High-quality video demonstrations with clear instructions
 - **Personalized Experience**: Customized for the user's specific needs and preferences
 
-### Senior-Friendly Design
+### Sleek and Modern Design
 
-- **Accessible Interface**: Large text, high contrast options, and simple navigation
-- **Touch-Optimized**: Large, easy-to-tap buttons and controls
-- **Reduced Motion Option**: Slower animations for users with motion sensitivity
+- **Modern UI/UX**: Visually stunning graphic interface, well laid out sitemap, and cohesive design
+- **Music and Video Integration**: Includes built in media players that seamlessly plays their files within the app 
 - **Error Prevention**: Forgiving inputs and clear recovery paths
 
 ### Content Features
@@ -65,48 +64,81 @@ CynthAI is a personalized chair yoga and tai chi web application designed specif
 ```
 cynthai/
 │
-├── public/                   # Static assets
-│   ├── assets/               # Images, icons, audio files
-│   ├── manifest.json         # PWA manifest
-│   └── favicon.svg           # App icon
+├── public/
+│   ├── assets/
+│   │   ├── icons/
+│   │   │   └── (app icons & favicon files)
+│   │   ├── images/
+│   │   │   ├── exercises/
+│   │   │   ├── inspiration/
+│   │   │   ├── programs/
+│   │   │   └── music/
+│   │   └── audio/
+│   │       └── (sample audio files)
+│   ├── manifest.json
+│   ├── favicon.svg
+│   └── robots.txt
 │
 ├── src/
-│   ├── components/           # React components
-│   │   ├── ui/               # Reusable UI components
-│   │   ├── exercise/         # Exercise-specific components
-│   │   └── Layout.tsx        # Main layout component
+│   ├── components/
+│   │   ├── ui/
+│   │   │   ├── CircularProgress.tsx
+│   │   │   ├── Button.tsx
+│   │   │   └── Card.tsx
+│   │   ├── Layout.tsx
+│   │   ├── NavBar.tsx
+│   │   └── exercise/
+│   │       ├── ExerciseCard.tsx
+│   │       ├── VideoPlayer.tsx
+│   │       └── ProgressIndicator.tsx
 │   │
-│   ├── contexts/             # Context providers
-│   │   ├── UserContext.tsx   # User profile and preferences
-│   │   ├── ProgressContext.tsx # Progress tracking
-│   │   └── AudioContext.tsx  # Audio playback management
+│   ├── contexts/
+│   │   ├── UserContext.tsx
+│   │   ├── ProgressContext.tsx
+│   │   └── AudioContext.tsx
 │   │
-│   ├── data/                 # Application data
-│   │   ├── programs.ts       # Exercise program definitions
-│   │   ├── inspiration.ts    # Inspirational content
-│   │   └── music.ts          # Music playlists
+│   ├── data/
+│   │   ├── programs.ts
+│   │   ├── inspiration.ts
+│   │   └── music.ts
 │   │
-│   ├── pages/                # Page components
-│   │   ├── Dashboard.tsx     # Home screen
-│   │   ├── ExercisePlayer.tsx # Exercise playback
-│   │   └── ...               # Other pages
+│   ├── hooks/
+│   │   ├── useLocalStorage.ts
+│   │   └── useMediaQuery.ts
 │   │
-│   ├── styles/               # Global styles
-│   │   └── index.css         # Main stylesheet with Tailwind
+│   ├── pages/
+│   │   ├── Dashboard.tsx
+│   │   ├── TodayPractice.tsx
+│   │   ├── Programs.tsx
+│   │   ├── ExercisePlayer.tsx
+│   │   ├── Inspiration.tsx
+│   │   ├── Music.tsx
+│   │   ├── Settings.tsx
+│   │   └── Onboarding.tsx
 │   │
-│   ├── utils/                # Utility functions
-│   │   └── registerSW.ts     # Service worker registration
+│   ├── styles/
+│   │   └── index.css
 │   │
-│   ├── App.tsx               # Main application component
-│   ├── main.tsx              # Application entry point
-│   └── types.ts              # TypeScript definitions
+│   ├── types.ts
+│   ├── App.tsx
+│   └── main.tsx
 │
-├── vite.config.ts            # Vite configuration
-├── tailwind.config.js        # Tailwind CSS configuration
-├── tsconfig.json             # TypeScript configuration
-├── package.json              # Dependencies and scripts
-└── README.md                 # Project documentation
+├── docs/
+│   ├── launch-instructions.md
+│   └── project-roadmap.md
+│
+├── index.html
+├── package.json
+├── tailwind.config.js
+├── vite.config.ts
+├── tsconfig.json
+<<<<<<< HEAD
+├── tsconfig.node.json
+=======
+>>>>>>> 56360646f92426441bd53b9be28d308739174b72
+└── README.md
 ```
+
 
 ## Getting Started
 
@@ -120,7 +152,7 @@ cynthai/
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/your-username/cynthai.git
+   git clone https://github.com/rtsii/cynthai.git
    cd cynthai
    ```
 
@@ -231,13 +263,8 @@ Customize the application appearance in `tailwind.config.js` and `src/styles/ind
 
 ## Accessibility Features
 
-CynthAI is designed with seniors in mind, incorporating numerous accessibility features:
+CynthAI accessibility features:
 
-- **Large Text Options**: Three text size options for better readability
-- **High Contrast Mode**: Enhanced visual contrast for users with vision impairments
-- **Reduced Motion**: Option to minimize animations for users with motion sensitivity
-- **Forgiving Inputs**: Extended touch timeouts and error prevention
-- **Screen Reader Support**: Proper ARIA labels and semantic HTML
 - **Keyboard Navigation**: Full keyboard accessibility for all functions
 - **Error Recovery**: Clear error messages and easy recovery paths
 

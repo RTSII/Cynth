@@ -1,235 +1,399 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Calendar, Clock, Award, Heart, ChevronRight, Play, Activity } from 'lucide-react';
 import { format } from 'date-fns';
-import { Calendar, Clock, Award, ArrowRight, PlayCircle } from 'lucide-react';
 
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
-import { Button } from '../components/ui/button';
-import CircularProgress from '../components/ui/CircularProgress';
+// Contexts
+import { useUser } from '@/contexts/UserContext';
+import { useProgress } from '@/contexts/ProgressContext';
+import { useAudio } from '@/contexts/AudioContext';
 
-import { useUser } from '../contexts/UserContext';
-import { useProgress } from '../contexts/ProgressContext';
-import { getProgramById } from '../data/programs';
+// Components
+import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import CircularProgress from '@/components/ui/CircularProgress';
+
+// Data and types
+import { Program } from '@/types';
+import { getProgramData } from '@/data/programs';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const { progress, getCurrentStreak, getTotalPracticeMinutes } = useProgress();
+  const { userProfile } = useUser();
+  const { progress, completedToday } = useProgress();
+  const { currentSong, playPause, isPlaying } = useAudio();
 
+  const [currentProgram, setCurrentProgram] = useState<Program | null>(null);
+  const [todaySession, setTodaySession] = useState<ProgramDay | null>(null);
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
   const [greeting, setGreeting] = useState<string>('');
-  const [todayDate, setTodayDate] = useState<string>('');
 
-  // Get today's exercise info if available
-  const chairYogaProgramId = user.selectedPrograms.chairYoga;
-  const taiChiProgramId = user.selectedPrograms.taiChi;
+  // Calculate progress percentage
+  const progressPercentage = progress
+    ? Math.round((progress.currentDay / (currentProgram?.totalDays || 100)) * 100)
+    : 0;
 
-  const chairYogaProgram = chairYogaProgramId ? getProgramById(chairYogaProgramId) : null;
-  const taiChiProgram = taiChiProgramId ? getProgramById(taiChiProgramId) : null;
+  // Load current program and today's session
+  useEffect(() => {
+    if (progress?.currentProgram) {
+      const program = getProgramData(progress.currentProgram);
+      setCurrentProgram(program);
 
-  // Calculate current streak
-  const currentStreak = getCurrentStreak();
-  const totalMinutes = getTotalPracticeMinutes();
+      if (program) {
+        const day = program.days.find(d => d.dayNumber === progress.currentDay);
+        if (day) {
+          setTodaySession(day);
+        }
+      }
+    }
+  }, [progress]);
 
   // Set greeting based on time of day
   useEffect(() => {
-    const setAppropriateGreeting = () => {
-      const now = new Date();
-      const hour = now.getHours();
+    // Set greeting based on time of day
+    const hour = new Date().getHours();
 
-      let greetingText = '';
-      if (hour < 12) {
-        greetingText = 'Good Morning';
-      } else if (hour < 18) {
-        greetingText = 'Good Afternoon';
+    if (hour < 12) {
+      setGreeting('Good Morning');
+    } else if (hour < 18) {
+      setGreeting('Good Afternoon');
+    } else {
+      setGreeting('Good Evening');
+    }
+  }, []);
+
+  const handleStartSession = () => {
+    try {
+      if (todaySession) {
+        navigate(`/exercise/${todaySession.programId}/${todaySession.id}/${todaySession.exercises[0].id}`);
       } else {
-        greetingText = 'Good Evening';
+        navigate('/programs');
       }
-
-      setGreeting(`${greetingText}, ${user.name}`);
-      setTodayDate(format(now, 'EEEE, MMMM d'));
-    };
-
-    setAppropriateGreeting();
-
-    // Update date every minute
-    const interval = setInterval(setAppropriateGreeting, 60000);
-
-    return () => clearInterval(interval);
-  }, [user.name]);
-
-  // Handle navigation to today's practice
-  const handleStartPractice = () => {
-    navigate('/today');
+    } catch (error) {
+      console.error('Error starting session:', error);
+      // Handle error appropriately
+    }
   };
 
-  // Handle navigation to programs
-  const handleBrowsePrograms = () => {
-    navigate('/programs');
-  };
+  // Sample achievements data (would come from context in a real implementation)
+  const achievements = [
+    { id: 1, title: "First Week Complete", earned: true },
+    { id: 2, title: "10-Day Streak", earned: true },
+    { id: 3, title: "Core Master", earned: false }
+  ];
 
-  // Get latest achievement if there is one
-  const latestAchievement = progress.achievements.length > 0
-    ? progress.achievements[progress.achievements.length - 1]
-    : null;
+  // Sample upcoming exercises (would come from todaySession in real implementation)
+  const upcomingExercises = useMemo(() =>
+    todaySession?.exercises.slice(0, 3).map(exercise => ({
+      id: exercise.id,
+      name: exercise.title,
+      duration: exercise.duration,
+      type: currentProgram?.category === 'chair-yoga' ? 'yoga' : 'tai-chi'
+    })) || [],
+    [todaySession, currentProgram?.category]
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div>
-        <h1 className="text-2xl font-bold text-neutral-800">{greeting}</h1>
-        <p className="text-neutral-600">{todayDate}</p>
-      </div>
+    <div className= "max-w-6xl mx-auto" >
+    <h1 className="text-2xl font-bold mb-6" >
+      { greeting }, { userProfile?.name || 'Cynthia'
+}!
+  </h1>
 
-      {/* Today's Practice Card */}
-      <Card variant="elevated">
-        <CardHeader>
-          <CardTitle>Today's Practice</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {(chairYogaProgram || taiChiProgram) ? (
-            <div className="space-y-4">
-              {chairYogaProgram && (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-lg">Chair Yoga</h3>
-                    <p className="text-neutral-600">{chairYogaProgram.title}</p>
-                  </div>
-                  <Button
-                    variant="primary"
-                    size="md"
-                    rightIcon={<PlayCircle className="w-5 h-5" />}
-                    onClick={handleStartPractice}
-                  >
-                    Start
-                  </Button>
-                </div>
-              )}
+{/* Today's practice card */ }
+<Card variant="highlight" className = "border-primary-100" >
+  <CardContent>
+  <div   // ...existing code...
+  
+  return (
+  <div className= "max-w-6xl mx-auto" >
+  <h1 className="text-2xl font-bold mb-6" >
+    { greeting }, { userProfile?.name || 'Cynthia'}!
+      </h1>
 
-              {taiChiProgram && (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-lg">Tai Chi</h3>
-                    <p className="text-neutral-600">{taiChiProgram.title}</p>
-                  </div>
-                  <Button
-                    variant="primary"
-                    size="md"
-                    rightIcon={<PlayCircle className="w-5 h-5" />}
-                    onClick={handleStartPractice}
-                  >
-                    Start
-                  </Button>
-                </div>
-              )}
+{/* Today's practice card */ }
+<Card variant="highlight" className = "border-primary-100" >
+  <CardContent>
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between" >
+    // ...existing code...="flex flex-col md:flex-row md:items-center md:justify-between" >
+    <div className="mb-4 md:mb-0" >
+      <div className="flex items-center mb-2" >
+        <Calendar size={ 20 } className = "text-primary-500 mr-2" />
+          <h2 className="text-lg font-medium" > Today's Practice</h2>
             </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-neutral-600 mb-4">You haven't selected any programs yet.</p>
-              <Button
+
+{
+  todaySession ? (
+    <>
+    <h3 className= "text-xl font-bold mb-2" > { todaySession.title } </h3>
+
+    < div className = "flex flex-wrap gap-2 mb-2" >
+      <span className="badge bg-blue-50 text-blue-700" >
+        <Clock size={ 16 } className = "mr-1" /> { todaySession.duration } min
+          </span>
+          < span className = "badge bg-purple-50 text-purple-700" >
+            { currentProgram?.category === 'chair-yoga' ? 'Chair Yoga' : 'Tai Chi'
+}
+</span>
+{
+  completedToday && (
+    <span className="badge bg-green-50 text-green-700" >
+      Completed Today
+        </span>
+                    )
+}
+</div>
+  </>
+              ) : (
+  <>
+  <h3 className= "text-xl font-bold mb-2" > No Program Selected </h3>
+    < p className = "text-gray-600 mb-2" >
+      Choose a program to start your practice journey
+        </p>
+        </>
+              )}
+</div>
+
+  < div className = "w-full md:w-auto" >
+    <Button 
                 variant="primary"
-                size="lg"
-                onClick={handleBrowsePrograms}
-              >
-                Browse Programs
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+size = "lg"
+icon = { Play }
+disabled = { completedToday }
+onClick = { handleStartSession }
+  >
+{
+  completedToday
+  ? "Completed Today"
+    : todaySession
+      ? "Start Practice"
+      : "Find Program"
+}
+  </Button>
+  </div>
+  </div>
+  </CardContent>
+  </Card>
 
-      {/* Progress Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center">
-              <Calendar className="w-8 h-8 text-primary-500 mb-2" />
-              <span className="text-3xl font-semibold text-neutral-800">{currentStreak}</span>
-              <span className="text-neutral-600">Day Streak</span>
-            </div>
-          </CardContent>
+{/* Progress Section */ }
+<h2 className="text-xl font-bold mb-4 mt-8" > Your Progress </h2>
+
+  < div className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8" >
+    <Card padding="md" className = "text-center" >
+      <CardContent>
+      <CircularProgress 
+              value={ progressPercentage }
+size = { 100}
+strokeWidth = { 10}
+className = "mb-2"
+progressColor = "var(--color-primary-500)"
+backgroundColor = "#E0E0E0"
+  />
+  <p className="font-medium mt-2" > Program Complete </p>
+    < p className = "text-gray-600 text-sm" >
+      { progress?.currentDay || 0} of { currentProgram?.totalDays || 0 } days
+        </p>
+        </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center">
-              <Clock className="w-8 h-8 text-primary-500 mb-2" />
-              <span className="text-3xl font-semibold text-neutral-800">{totalMinutes}</span>
-              <span className="text-neutral-600">Total Minutes</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Monthly Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Monthly Progress</CardTitle>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <CircularProgress
-            value={(progress.monthlyMinutes / progress.monthlyGoal) * 100 || 0} // Dynamically calculate monthly progress
-            size="lg"
-            thickness="thick"
-            label="Completed"
-            color="primary"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Latest Achievement */}
-      {latestAchievement && (
-        <Card variant="elevated" className="bg-gradient-to-r from-primary-50 to-secondary-50">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Award className="w-5 h-5 text-primary-500 mr-2" />
-              Latest Achievement
-            </CardTitle>
-          </CardHeader>
+        < Card padding = "md" className = "text-center" >
           <CardContent>
-            <div className="flex items-center">
-              <div className="bg-white p-3 rounded-full mr-4">
-                <img
-                  src={latestAchievement.iconUrl || '/assets/images/achievements/default.svg'}
-                  alt={latestAchievement.title}
-                  className="w-12 h-12"
-                />
+          <div className="flex justify-center mb-2" >
+            <Heart size={ 60 } className = "text-red-500" />
               </div>
-              <div>
-                <h3 className="font-medium text-lg">{latestAchievement.title}</h3>
-                <p className="text-neutral-600">{latestAchievement.description}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              < p className = "text-2xl font-bold" > { progress?.streakDays || 0}</p>
+                < p className = "font-medium" > Day Streak </p>
+                  < p className = "text-gray-600 text-sm" > Keep it going! </p>
+                    </CardContent>
+                    </Card>
 
-      {/* Quick Access */}
-      <div>
-        <h2 className="text-xl font-semibold mb-3">Quick Access</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <Button
-            variant="outline"
-            size="lg"
-            fullWidth
-            rightIcon={<ArrowRight className="w-5 h-5" />}
-            onClick={() => navigate('/programs')}
-          >
-            All Programs
-          </Button>
-
-          <Button
-            variant="outline"
-            size="lg"
-            fullWidth
-            rightIcon={<ArrowRight className="w-5 h-5" />}
-            onClick={() => navigate('/inspiration')}
-          >
-            Inspiration
-          </Button>
-        </div>
-      </div>
+                    < Card padding = "md" className = "col-span-1 md:col-span-2" >
+                      <CardContent>
+                      <h3 className="font-bold mb-3" > Coming Up Next </h3>
+{
+  upcomingExercises.length > 0 ? (
+    <div>
+    {
+      upcomingExercises.map((exercise, index) => (
+        <div key= { exercise.id } className = "mb-2" >
+        <div className="flex justify-between items-center py-2" >
+      <div className="flex items-center" >
+      <span className="font-medium" > { exercise.name } </span>
+      < span className = {`ml-2 px-2 py-1 rounded-full text-xs ${exercise.type === 'yoga' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
+        }`} >
+    { exercise.type }
+    </span>
     </div>
+    < span className = "text-gray-600 text-sm" > { exercise.duration } min </span>
+      </div>
+  {
+    index < upcomingExercises.length - 1 && (
+      <div className="border-b border-gray-200" > </div>
+                    )
+  }
+  </div>
+                ))
+}
+</div>
+            ) : (
+  <p className= "text-gray-500 text-center py-4" >
+  Select a program to see upcoming exercises
+    </p>
+            )}
+</CardContent>
+  </Card>
+  </div>
+
+{/* Achievements Section */ }
+<div className="mb-8" >
+  <div className="flex justify-between items-center mb-4" >
+    <h2 className="text-xl font-bold" > Achievements </h2>
+      < button
+className = "text-primary-600 flex items-center"
+onClick = {() => setShowAllAchievements(!showAllAchievements)}
+          >
+  { showAllAchievements? 'Show Less': 'View All' }
+  < ChevronRight size = { 16} className = "ml-1" />
+    </button>
+    </div>
+
+    < div className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" >
+    {
+      achievements
+            .slice(0, showAllAchievements ? achievements.length : 2)
+        .map(achievement => (
+          <Card 
+                key= { achievement.id } 
+                className = {`text-center ${achievement.earned ? 'border-2 border-yellow-300' : 'opacity-70'
+            }`}
+      >
+      <CardContent>
+      <div className="p-2 mb-2 mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-yellow-50" >
+        {
+          achievement.earned ? (
+            <Award size= { 32} className="text-yellow-500" />
+                    ) : (
+              <span role="img" aria - label="locked" className = "text-3xl" >🔒</span>
+            )}
+</div>
+  < h3 className = "font-bold" > { achievement.title } </h3>
+    < p className = "text-gray-600 text-sm" >
+      { achievement.earned ? 'Completed' : 'Keep practicing!' }
+      </p>
+      </CardContent>
+      </Card>
+            ))}
+</div>
+  </div>
+
+{/* Level Information */ }
+<Card className="bg-blue-50 border-none mb-6" >
+  <CardContent>
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center" >
+    <div>
+    <p className="text-gray-600 text-sm" > Current Level </p>
+      < h3 className = "font-bold" > { userProfile?.level || 'Novice'}</h3>
+        < p className = "mt-1 text-sm" >
+          You're making great progress! Keep up the good work.
+            </p>
+            </div>
+            < div className = "mt-3 md:mt-0" >
+              <Button variant="outline" onClick = {() => navigate('/programs')}>
+                View Path
+                  </Button>
+                  </div>
+                  </div>
+                  </CardContent>
+                  </Card>
+
+{/* Now Playing Mini Player */ }
+{
+  currentSong && (
+    <Card className="fixed bottom-16 left-4 right-4 max-w-lg mx-auto z-20 p-3 shadow-lg" >
+      <div className="flex items-center" >
+        <img 
+              src={ currentSong.artwork }
+  alt = { currentSong.title }
+  className = "w-10 h-10 rounded"
+    />
+
+    <div className="flex-1 mx-3 truncate" >
+      <p className="font-medium text-sm" > { currentSong.title } </p>
+        < p className = "text-xs text-gray-500" > { currentSong.artist } </p>
+          </div>
+
+          < button
+  className = "p-2 rounded-full hover:bg-gray-100"
+  onClick = { playPause }
+  aria - label={ isPlaying ? 'Pause' : 'Play' }
+            >
+    {
+      isPlaying?(
+                <span className = "block w-4 h-4 border-l-2 border-r-2 border-primary-600" > </span>
+      ): (
+          <Play size = { 16 } className = "text-primary-600" />
+              )
+}
+</button>
+  </div>
+  </Card>
+      )}
+</div>
   );
 };
 
 export default Dashboard;
+
+interface Progress {
+  currentProgram?: string;
+  currentDay: number;
+  streakDays: number;
+}
+
+interface ProgressContextType {
+  progress: Progress | null;
+  completedToday: boolean;
+  updateProgress: (newProgress: Progress) => void;
+  setCompletedToday: (completed: boolean) => void;
+}
+
+const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
+
+export function ProgressProvider({ children }: { children: React.ReactNode }) {
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [completedToday, setCompletedToday] = useState(false);
+
+  const updateProgress = (newProgress: Progress) => {
+    setProgress(newProgress);
+  };
+
+  return (
+    <ProgressContext.Provider value= {{ progress, completedToday, updateProgress, setCompletedToday }
+}>
+  { children }
+  </ProgressContext.Provider>
+  );
+}
+
+export function useProgress() {
+  const context = useContext(ProgressContext);
+  if (context === undefined) {
+    throw new Error('useProgress must be used within a ProgressProvider');
+  }
+  return context;
+}
+
+interface Exercise {
+  id: string;
+  title: string;
+  duration: number;
+}
+
+interface ProgramDay {
+  id: string;
+  programId: string;
+  dayNumber: number;
+  title: string;
+  duration: number;
+  exercises: Exercise[];
+}

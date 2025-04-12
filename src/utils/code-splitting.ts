@@ -21,21 +21,17 @@ export function withSuspense<T extends ComponentType<any>>(
     Component: T,
     config: LazyLoadConfig = {}
 ) {
-    const {
-        fallback = <LoadingSpinner size="medium" />,
-    errorFallback,
-        minDelay = 300
-} = config;
+    const { fallback = <LoadingSpinner size="medium" />, errorFallback, minDelay = 300 } = config;
 
-return function WrappedComponent(props: React.ComponentProps<T>) {
-    return (
-        <ErrorBoundary fallback= { errorFallback } >
-        <Suspense fallback={ fallback }>
-            <Component { ...props } />
-            </Suspense>
+    return function WrappedComponent(props: React.ComponentProps<T>) {
+        return (
+            <ErrorBoundary fallback={errorFallback}>
+                <Suspense fallback={fallback as React.ReactNode}>
+                    <Component {...props} />
+                </Suspense>
             </ErrorBoundary>
         );
-};
+    };
 }
 
 // Create lazy loaded component with minimum delay
@@ -58,7 +54,7 @@ export function preloadComponent(
 }
 
 // Route-based code splitting helper
-export function createRouteSplitting(routes: Record<string, () => Promise<{ default: ComponentType<any> }>>) {
+export function createRouteSplitting(routes: Record<string, () => Promise<{ default: ComponentType<any> }>>): { components: Record<string, React.ComponentType<any>>; preloadRoute: (routeName: string) => void; preloadAdjacent: (currentRoute: string) => void } {
     const components: Record<string, ReturnType<typeof preloadComponent>> = {};
 
     // Create preloadable components
@@ -68,7 +64,7 @@ export function createRouteSplitting(routes: Record<string, () => Promise<{ defa
 
     // Preload specific route
     const preloadRoute = (routeName: keyof typeof routes) => {
-        const component = components[routeName];
+        const component = components[routeName as string];
         if (component?.preload) {
             component.preload();
         }
@@ -76,11 +72,11 @@ export function createRouteSplitting(routes: Record<string, () => Promise<{ defa
 
     // Preload adjacent routes
     const preloadAdjacent = (currentRoute: keyof typeof routes) => {
-        const routes = Object.keys(components);
+        const routeNames = Object.keys(routes);
         const currentIndex = routes.indexOf(currentRoute as string);
 
         // Preload next and previous routes if they exist
-        if (currentIndex > 0) {
+        if (currentIndex > 0 && routes[currentIndex - 1]) {
             preloadRoute(routes[currentIndex - 1] as keyof typeof routes);
         }
         if (currentIndex < routes.length - 1) {

@@ -343,26 +343,23 @@ export function createAccessibleButtonProps({ onClick, label, description }: Acc
     };
 }
 
-const RatingStars: React.FC<{ rating: number }> = ({ rating }) => {
-    return (
+interface RatingStarsProps {
+    rating: number;
+    handleRating: (rating: number) => void;
+}
 
-        <div className="rating-container" role="group" aria-label="Exercise Rating"></div>
-            {
-        [1, 2, 3, 4, 5].map((star) => (
-            <button
-                key={star}
-                aria-label={`Rate ${star} out of 5 stars`}
-                aria-pressed={rating >= star}
-                onClick={() => handleRating(star)}
-                className={`star ${rating >= star ? 'active' : ''}`}
-            >
-                ⭐
+export const RatingStars: React.FC<RatingStarsProps> = ({ rating, handleRating }) => (
+    <div className="rating-container" role="group" aria-label="Exercise Rating">
+        {[1, 2, 3, 4, 5].map((star) => (
+            <button key={star} aria-label={`Rate ${star} out of 5 stars`} aria-pressed={rating >= star} onClick={() => handleRating(star)} className={`star ${rating >= star ? 'active' : ''}`}>
+                ⭐︎
             </button>
-        ))
-    }
-        </div >
+        ))}
+    </div>
+);
 
-    );
+export function handleRating(exerciseId: string, rating: number) {
+    console.log(`Exercise ${exerciseId} rated with ${rating}`);
 };
 
 function handleRating(exerciseId: string, rating: number) {

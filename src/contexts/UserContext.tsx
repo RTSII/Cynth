@@ -92,22 +92,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // Check if user has completed onboarding
         const onboardedStatus = localStorage.getItem('@cynthai_onboarded');
         setIsOnboarded(onboardedStatus === 'true');
 
-        // Load user profile
         const profile = localStorage.getItem('@cynthai_user_profile');
 
         if (profile) {
           setUserProfile(JSON.parse(profile));
         } else if (onboardedStatus === 'true') {
-          // If onboarded but no profile, create default profile
           await saveUserProfile(defaultUserProfile);
           setUserProfile(defaultUserProfile);
         }
 
-        // Apply accessibility settings if available
         if (profile) {
           const userProfile = JSON.parse(profile) as UserProfile;
           applyAccessibilitySettings(userProfile.preferences);
@@ -120,9 +116,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadUserData();
   }, []);
 
-  // Apply accessibility settings to document
   const applyAccessibilitySettings = (preferences: UserPreferences) => {
-    // Apply text size
     if (preferences.textSize === 'large') {
       document.body.classList.add('text-base-large');
       document.body.classList.remove('text-lg');
@@ -133,7 +127,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       document.body.classList.remove('text-base-large', 'text-lg');
     }
 
-    // Apply high contrast
     if (preferences.highContrast) {
       document.body.classList.add('high-contrast');
     } else {
@@ -141,12 +134,78 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Save user profile to local storage
   const saveUserProfile = async (profile: UserProfile) => {
     try {
       localStorage.setItem('@cynthai_user_profile', JSON.stringify(profile));
     } catch (error) {
       console.error('Error saving user profile:', error);
+      throw error;
+    }
+  };
+
+  const updateUserProfile = async (profile: Partial<UserProfile>) => {
+    try {
+      if (!userProfile) return;
+
+      const updatedProfile = {
+        ...userProfile,
+        ...profile,
+      };
+
+      await saveUserProfile(updatedProfile);
+      setUserProfile(updatedProfile);
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  };
+
+  const updatePreferences = async (preferences: Partial<UserPreferences>) => {
+    try {
+      if (!userProfile) return;
+
+      const updatedProfile = {
+        ...userProfile,
+        preferences: {
+          ...userProfile.preferences,
+          ...preferences,
+        },
+      };
+
+      await saveUserProfile(updatedProfile);
+      setUserProfile(updatedProfile);
+      applyAccessibilitySettings(updatedProfile.preferences);
+    } catch (error) {
+      console.error('Error updating preferences:', error);
+      throw error;
+    }
+  };
+
+  const completeOnboarding = async () => {
+    try {
+      localStorage.setItem('@cynthai_onboarded', 'true');
+      setIsOnboarded(true);
+
+      if (!userProfile) {
+        await saveUserProfile(defaultUserProfile);
+        setUserProfile(defaultUserProfile);
+        applyAccessibilitySettings(defaultUserProfile.preferences);
+      }
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      throw error;
+    }
+  };
+
+  const resetProfile = async () => {
+    try {
+      localStorage.removeItem('@cynthai_onboarded');
+      localStorage.removeItem('@cynthai_user_profile');
+      setIsOnboarded(false);
+      setUserProfile(null);
+      document.body.classList.remove('text-base-large', 'text-lg', 'high-contrast');
+    } catch (error) {
+      console.error('Error resetting profile:', error);
       throw error;
     }
   };
@@ -165,82 +224,4 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       {children}
     </UserContext.Provider>
   );
-};
-
-// Update user profile
-const updateUserProfile = async (profile: Partial<UserProfile>) => {
-  try {
-    if (!userProfile) return;
-
-    const updatedProfile = {
-      ...userProfile,
-      ...profile,
-    };
-
-    await saveUserProfile(updatedProfile);
-    setUserProfile(updatedProfile);
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    throw error;
-  }
-};
-
-// Update user preferences
-const updatePreferences = async (preferences: Partial<UserPreferences>) => {
-  try {
-    if (!userProfile) return;
-
-    const updatedProfile = {
-      ...userProfile,
-      preferences: {
-        ...userProfile.preferences,
-        ...preferences,
-      },
-    };
-
-    await saveUserProfile(updatedProfile);
-    setUserProfile(updatedProfile);
-
-    // Apply accessibility settings
-    applyAccessibilitySettings(updatedProfile.preferences);
-  } catch (error) {
-    console.error('Error updating preferences:', error);
-    throw error;
-  }
-};
-
-// Complete onboarding
-const completeOnboarding = async () => {
-  try {
-    localStorage.setItem('@cynthai_onboarded', 'true');
-    setIsOnboarded(true);
-
-    // If no profile exists, create default profile
-    if (!userProfile) {
-      await saveUserProfile(defaultUserProfile);
-      setUserProfile(defaultUserProfile);
-
-      // Apply accessibility settings
-      applyAccessibilitySettings(defaultUserProfile.preferences);
-    }
-  } catch (error) {
-    console.error('Error completing onboarding:', error);
-    throw error;
-  }
-};
-
-// Reset profile
-const resetProfile = async () => {
-  try {
-    localStorage.removeItem('@cynthai_onboarded');
-    localStorage.removeItem('@cynthai_user_profile');
-    setIsOnboarded(false);
-    setUserProfile(null);
-
-    // Reset accessibility settings
-    document.body.classList.remove('text-base-large', 'text-lg', 'high-contrast');
-  } catch (error) {
-    console.error('Error resetting profile:', error);
-    throw error;
-  }
 };

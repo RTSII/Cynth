@@ -1,113 +1,154 @@
-import { registerSW as registerViteSW } from 'virtual:pwa-register';
+import { logError } from './analytics';
 
-export const registerSW = () => {
-  if ('serviceWorker' in navigator) {
-    // Register the service worker from vite-plugin-pwa
-    const updateSW = registerViteSW({
-      // Show a custom prompt when updates are available
-      onNeedRefresh() {
-        if (confirm('New content is available. Reload to update?')) {
-          updateSW(true);
-        }
-      },
-      // Handle registration errors
-      onRegisterError(error) {
-        console.error('Service worker registration error:', error);
-      },
-      // Immediate register the service worker
-      immediate: true
-    });
+// Cache names
+const CACHE_NAMES = {
+  STATIC: 'cynthai-static-v1',
+  DYNAMIC: 'cynthai-dynamic-v1',
+  EXERCISES: 'cynthai-exercises-v1'
+};
 
-    // Handle manual refresh request (e.g., from settings page)
-    window.updateSW = () => {
-      updateSW(true);
+// Resources to pre-cache
+const STATIC_RESOURCES = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/assets/icons/icon-192x192.png',
+  '/assets/icons/icon-512x512.png'
+];
+
+// Send list of URLs to cache to the service worker
+function sendInitialCacheList(worker: ServiceWorker) {
+  worker.postMessage({
+    type: 'CACHE_URLS',
+    payload: {
+      staticUrls: STATIC_RESOURCES,
+      cacheNames: CACHE_NAMES
+    }
+  });
+}
+
+// Notify user of available update
+function notifyUserOfUpdate() {
+  const event = new CustomEvent('serviceWorkerUpdate', {
+    detail: {
+      message: 'New version available',
+      reload: () => window.location.reload()
+    }
+  });
+  window.dispatchEvent(event);
+}
+
+// Check if app is installed
+export function isAppInstalled(): boolean {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+    ('standalone' in navigator && (navigator as any).standalone === true);
+}
+
+// Check if offline
+export function isOffline(): boolean {
+  return !navigator.onLine;
+}
+
+// Listen for online/offline events
+export function setupConnectivityListeners(
+  onOnline: () => void,
+  onOffline: () => void
+) {
+  window.addEventListener('online', onOnline);
+  window.addEventListener('offline', onOffline);
+
+  return () => {
+    window.removeEventListener('online', onOnline);
+    window.removeEventListener('offline', onOffline);
+  };
+}
+
+// Cache exercise videos for offline use
+export async function cacheExerciseVideos(videoUrls: string[]) {
+  if (!('serviceWorker' in navigator)) return;
+
+  const registration = await navigator.serviceWorker.ready;
+  registration.active?.postMessage({
+    type: 'CACHE_EXERCISE_VIDEOS',
+    payload: {
+      videoUrls,
+      cacheName: CACHE_NAMES.EXERCISES
+    }
+  });
+}
+
+// Clear exercise video cache
+export async function clearExerciseCache() {
+  if (!('serviceWorker' in navigator)) return;
+
+  const registration = await navigator.serviceWorker.ready;
+  registration.active?.postMessage({
+    type: 'CLEAR_EXERCISE_CACHE',
+    payload: {
+      cacheName: CACHE_NAMES.EXERCISES
+    }
+  });
+}
+
+// Check cache storage usage
+export async function checkCacheStorage(): Promise<{
+  usage: number;
+  quota: number;
+  percentage: number;
+}> {
+  if ('storage' in navigator && 'estimate' in navigator.storage) {
+    const { usage, quota } = await navigator.storage.estimate();
+    return {
+      usage: usage || 0,
+      quota: quota || 0,
+      percentage: usage && quota ? (usage / quota) * 100 : 0
     };
-
-    // Enhanced offline detection
-    window.addEventListener('online', () => {
-      document.body.classList.remove('offline-mode');
-      
-      // Show a notification that connection is restored
-      showNotification('Connection restored', 'You are back online.');
-    });
-
-    window.addEventListener('offline', () => {
-      document.body.classList.add('offline-mode');
-      
-      // Show a notification that we're offline
-      showNotification('Offline mode', 'App will continue to work with limited functionality.');
-    });
-
-    // Check initial offline state
-    if (!navigator.onLine) {
-      document.body.classList.add('offline-mode');
-    }
   }
-};
+  return {
+    usage: 0,
+    quota: 0,
+    percentage: 0
+  };
+}
 
-// Helper function to show in-app notifications
-const showNotification = (title: string, message: string) => {
-  // Create notification element
-  const notificationElement = document.createElement('div');
-  notificationElement.className = 'fixed top-4 right-4 z-50 max-w-sm bg-white rounded-lg shadow-lg border border-neutral-200 p-4 transform transition-transform duration-300 ease-in-out';
-  notificationElement.style.transform = 'translateY(-100%)';
-  
-  notificationElement.innerHTML = `
-    <div class="flex">
-      <div class="ml-3">
-        <p class="text-sm font-medium text-neutral-900">${title}</p>
-        <p class="mt-1 text-sm text-neutral-600">${message}</p>
-      </div>
-      <div class="ml-auto pl-3">
-        <button class="inline-flex text-neutral-400 hover:text-neutral-600 focus:outline-none">
-          <span class="sr-only">Close</span>
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-  `;
-  
-  // Add to DOM
-  document.body.appendChild(notificationElement);
-  
-  // Animate in
-  setTimeout(() => {
-    notificationElement.style.transform = 'translateY(0)';
-  }, 10);
-  
-  // Add click handler to close button
-  const closeButton = notificationElement.querySelector('button');
-  if (closeButton) {
-    closeButton.addEventListener('click', () => {
-      notificationElement.style.transform = 'translateY(-100%)';
-      
-      // Remove from DOM after animation completes
-      setTimeout(() => {
-        document.body.removeChild(notificationElement);
-      }, 300);
-    });
-  }
-  
-  // Auto-dismiss after 5 seconds
-  setTimeout(() => {
-    if (document.body.contains(notificationElement)) {
-      notificationElement.style.transform = 'translateY(-100%)';
-      
-      // Remove from DOM after animation completes
-      setTimeout(() => {
-        if (document.body.contains(notificationElement)) {
-          document.body.removeChild(notificationElement);
+// Resources to pre-cache
+const STATIC_RESOURCES = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/assets/icons/icon-192x192.png',
+  '/assets/icons/icon-512x512.png'
+];
+
+export async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js', {
+        scope: '/'
+      });
+
+      // Handle updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New content is available
+              notifyUserOfUpdate();
+            }
+          });
         }
-      }, 300);
-    }
-  }, 5000);
-};
+      });
 
-// Extend the Window interface to include our custom functions
-declare global {
-  interface Window {
-    updateSW: () => void;
+      // Initial service worker setup
+      if (registration.active) {
+        sendInitialCacheList(registration.active);
+      }
+
+      return registration;
+    } catch (error) {
+      logError(error as Error, { context: 'Service Worker Registration' });
+      console.error('Service worker registration failed:', error);
+    }
   }
 }

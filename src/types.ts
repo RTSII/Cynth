@@ -2,11 +2,17 @@
  * Core types for the CynthAI application
  */
 
-// Program difficulty levels
-export type DifficultyLevel = 'Novice' | 'Active' | 'Advanced';
+// Enums
+export enum DifficultyLevel {
+  Novice = 'Novice',
+  Active = 'Active',
+  Advanced = 'Advanced'
+}
 
-// Program types
-export type ProgramType = 'ChairYoga' | 'TaiChi';
+export enum ProgramType {
+  ChairYoga = 'chair-yoga',
+  TaiChi = 'tai-chi'
+}
 
 // User interface preferences
 export interface UIPreferences {
@@ -37,35 +43,48 @@ export interface UserProfile {
   };
 }
 
+// Feedback cues for exercises
+export interface FeedbackCues {
+  start?: string;
+  during?: string[];
+  end?: string;
+}
+
+// Modification for exercises
+export interface Modification {
+  id: string;
+  title: string;
+  description: string;
+  forCondition: string;
+  instructions: string[];
+}
+
 // Exercise definition
 export interface Exercise {
   id: string;
   title: string;
+  type: string;
+  focusArea: string;
+  difficulty: string;
+  duration: number; // in minutes
   description: string;
-  durationSeconds: number;
-  videoUrl: string;
-  thumbnailUrl: string;
-  difficultyLevel: DifficultyLevel;
-  targetAreas: string[];
-  modifications: {
-    easier: string | null;
-    harder: string | null;
-  };
+  videoUrl?: string;
   instructions: string[];
   precautions: string[];
-  benefitDescription: string;
+  benefits: string[];
+  modifications?: Modification[];
+  feedbackCues?: FeedbackCues;
 }
 
 // Day in a program
 export interface ProgramDay {
   id: string;
-  dayNumber: number;
   title: string;
-  description: string;
   exercises: Exercise[];
-  totalDurationMinutes: number;
-  focusArea: string;
 }
+
+// Feedback type
+export type FeedbackType = 'start' | 'progress' | 'complete' | 'warning';
 
 // Program definition
 export interface Program {
@@ -84,32 +103,35 @@ export interface Program {
 // User progress for an exercise
 export interface ExerciseProgress {
   exerciseId: string;
-  completed: boolean;
-  completedAt: string | null;
-  durationSeconds: number;
-  rating: number | null;
-  notes: string | null;
+  isCompleted: boolean;
+  isModified: boolean;
+  completedAt?: string;
+  rating?: number;
+  notes?: string;
 }
 
-// User progress for a day
-export interface DayProgress {
-  dayId: string;
+export interface CompletedExercise {
+  id: string;
+  exerciseId: string;
   programId: string;
-  completed: boolean;
-  completedAt: string | null;
-  exercises: ExerciseProgress[];
+  dayId: string;
+  completedDate: string;
+  duration: number;
+  rating: number;
+  notes?: string;
 }
 
 // User progress tracking
 export interface UserProgress {
-  userId: string;
-  currentStreak: number;
+  streakDays: number;
   longestStreak: number;
-  lastActiveDate: string | null;
-  totalPracticeMinutes: number;
   totalSessionsCompleted: number;
-  dayProgress: Record<string, DayProgress>;
+  totalMinutesPracticed: number;
+  lastSessionDate: string;
+  completedExercises: CompletedExercise[];
   achievements: Achievement[];
+  currentProgram: string;
+  currentDay: number;
 }
 
 // Achievement definition
@@ -117,14 +139,9 @@ export interface Achievement {
   id: string;
   title: string;
   description: string;
+  unlockedAt: string;
+  type: 'streak' | 'completion' | 'milestone';
   iconUrl: string;
-  unlockedAt: string | null;
-  type: 'streak' | 'milestone' | 'completion' | 'special';
-  requirement: {
-    type: 'sessions' | 'streak' | 'minutes' | 'program';
-    value: number;
-    programId?: string;
-  };
 }
 
 // Inspiration item
@@ -224,4 +241,36 @@ export interface LocationState {
   programId?: string;
   dayId?: string;
   exerciseId?: string;
+}
+
+// Error types
+export class BaseError extends Error {
+  constructor(message: string, public code: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
+
+export class ExerciseError extends BaseError {
+  constructor(message: string, code: 'EXERCISE_NOT_FOUND' | 'INVALID_EXERCISE' | 'PROGRESS_SAVE_FAILED') {
+    super(message, code);
+  }
+}
+
+export class NetworkError extends BaseError {
+  constructor(message: string) {
+    super(message, 'NETWORK_ERROR');
+  }
+}
+
+export class AudioError extends BaseError {
+  constructor(message: string, code: 'AUDIO_LOAD_FAILED' | 'AUDIO_PLAY_FAILED' | 'AUDIO_UNSUPPORTED') {
+    super(message, code);
+  }
+}
+
+export class VideoError extends BaseError {
+  constructor(message: string, code: 'VIDEO_LOAD_FAILED' | 'VIDEO_PLAY_FAILED' | 'VIDEO_UNSUPPORTED') {
+    super(message, code);
+  }
 }

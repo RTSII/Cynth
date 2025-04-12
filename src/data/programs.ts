@@ -11,12 +11,8 @@ import { useProgress } from '@/contexts/ProgressContext';
 import { useUser } from '@/contexts/UserContext';
 
 // Data and types
-import { Program } from '@/types';
-import { programs, getProgramsByCategory, getProgramsByLevel } from '@/data/programs';
-
-export const getProgramById = (id: string) => {
-    // Implementation here
-};
+import { Program, ProgramType, DifficultyLevel } from '@/types';
+import { programs, getProgramById, getProgramsByCategory, getProgramsByLevel } from '@/data/programs';
 
 const Programs: React.FC = () => {
     const navigate = useNavigate();
@@ -25,8 +21,8 @@ const Programs: React.FC = () => {
 
     const [allPrograms, setAllPrograms] = useState<Program[]>([]);
     const [filteredPrograms, setFilteredPrograms] = useState<Program[]>([]);
-    const [activeFilter, setActiveFilter] = useState<'all' | 'chair-yoga' | 'tai-chi'>('all');
-    const [activeLevel, setActiveLevel] = useState<'all' | 'Novice' | 'Active' | 'Advanced'>('all');
+    const [activeFilter, setActiveFilter] = useState<'all' | ProgramType>('all');
+    const [activeLevel, setActiveLevel] = useState<'all' | DifficultyLevel>('all');
     const [showFilters, setShowFilters] = useState(false);
     const [currentProgram, setCurrentProgram] = useState<Program | null>(null);
 
@@ -34,10 +30,10 @@ const Programs: React.FC = () => {
     useEffect(() => {
         // Sort programs by level and month
         const sortedPrograms = [...programs].sort((a, b) => {
-            const levelOrder = { 'Novice': 0, 'Active': 1, 'Advanced': 2 };
-            const levelDiff = levelOrder[a.level] - levelOrder[b.level];
+            const levelOrder = { [DifficultyLevel.Novice]: 0, [DifficultyLevel.Active]: 1, [DifficultyLevel.Advanced]: 2 };
+            const levelDiff = levelOrder[a.difficultyLevel] - levelOrder[b.difficultyLevel];
             if (levelDiff !== 0) return levelDiff;
-            return a.month - b.month;
+            return a.durationDays - b.durationDays;
         });
 
         setAllPrograms(sortedPrograms);
@@ -58,12 +54,12 @@ const Programs: React.FC = () => {
 
         // Apply category filter
         if (activeFilter !== 'all') {
-            result = result.filter(program => program.category === activeFilter);
+            result = result.filter(program => program.type === activeFilter);
         }
 
         // Apply level filter
         if (activeLevel !== 'all') {
-            result = result.filter(program => program.level === activeLevel);
+            result = result.filter(program => program.difficultyLevel === activeLevel);
         }
 
         setFilteredPrograms(result);
@@ -104,25 +100,25 @@ size = "sm"
                     <h3 className="text-sm text-gray-600 mb-2" > Program Type </h3>
                         < div className = "flex flex-wrap gap-2" >
                             <Button
-                  variant={ activeFilter === 'all' ? 'primary' : 'secondary' }
+                                    variant={ activeFilter === 'all' ? 'primary' : 'secondary' }
     size = "sm"
     onClick = {() => setActiveFilter('all')
 }
-                >
+                                >
     All Types
         </Button>
         < Button
-variant = { activeFilter === 'chair-yoga' ? 'primary' : 'secondary'}
+variant = { activeFilter === ProgramType.ChairYoga ? 'primary' : 'secondary'}
 size = "sm"
-onClick = {() => setActiveFilter('chair-yoga')}
-                >
+onClick = {() => setActiveFilter(ProgramType.ChairYoga)}
+                                >
     Chair Yoga
         </Button>
         < Button
-variant = { activeFilter === 'tai-chi' ? 'primary' : 'secondary'}
+variant = { activeFilter === ProgramType.TaiChi ? 'primary' : 'secondary'}
 size = "sm"
-onClick = {() => setActiveFilter('tai-chi')}
-                >
+onClick = {() => setActiveFilter(ProgramType.TaiChi)}
+                                >
     Tai Chi
         </Button>
         </div>
@@ -132,38 +128,38 @@ onClick = {() => setActiveFilter('tai-chi')}
         <h3 className="text-sm text-gray-600 mb-2" > Difficulty Level </h3>
             < div className = "flex flex-wrap gap-2" >
                 <Button
-                  variant={ activeLevel === 'all' ? 'primary' : 'secondary' }
+                                    variant={ activeLevel === 'all' ? 'primary' : 'secondary' }
 size = "sm"
 onClick = {() => setActiveLevel('all')}
-                >
+                                >
     All Levels
         </Button>
         < Button
-variant = { activeLevel === 'Novice' ? 'primary' : 'secondary'}
+variant = { activeLevel === DifficultyLevel.Novice ? 'primary' : 'secondary'}
 size = "sm"
-onClick = {() => setActiveLevel('Novice')}
-                >
+onClick = {() => setActiveLevel(DifficultyLevel.Novice)}
+                                >
     Novice
     </Button>
     < Button
-variant = { activeLevel === 'Active' ? 'primary' : 'secondary'}
+variant = { activeLevel === DifficultyLevel.Active ? 'primary' : 'secondary'}
 size = "sm"
-onClick = {() => setActiveLevel('Active')}
-                >
+onClick = {() => setActiveLevel(DifficultyLevel.Active)}
+                                >
     Active
     </Button>
     < Button
-variant = { activeLevel === 'Advanced' ? 'primary' : 'secondary'}
+variant = { activeLevel === DifficultyLevel.Advanced ? 'primary' : 'secondary'}
 size = "sm"
-onClick = {() => setActiveLevel('Advanced')}
-                >
+onClick = {() => setActiveLevel(DifficultyLevel.Advanced)}
+                                >
     Advanced
     </Button>
     </div>
     </div>
     </CardContent>
     </Card>
-      )}
+            )}
 
 {/* Current Program */ }
 {
@@ -175,24 +171,21 @@ onClick = {() => setActiveLevel('Advanced')}
                     <div className="flex flex-col sm:flex-row items-start justify-between" >
                         <div className="flex mb-4 sm:mb-0" >
                             <img
-                    src={ currentProgram.thumbnail }
+                                        src={ currentProgram.thumbnailUrl }
     alt = { currentProgram.title }
     className = "w-20 h-20 rounded-lg object-cover mr-4"
         />
         <div>
         <h3 className="font-medium" > { currentProgram.title } </h3>
             < p className = "text-sm text-gray-500 mb-2" >
-                { currentProgram.level } Level • Month { currentProgram.month }
-    </p>
-        < div className = "flex flex-wrap gap-2" >
-            <span className="badge bg-blue-50 text-blue-700" >
-                <Clock size={ 12 } className = "mr-1" /> { currentProgram.totalDuration } minutes
-                    </span>
-                    < span className = "badge bg-green-50 text-green-700" >
-                        <Calendar size={ 12 } className = "mr-1" /> { currentProgram.totalDays } days
-                            </span>
-                            < span className = "badge bg-purple-50 text-purple-700" >
-                                Day { progress?.currentDay || 1 } of { currentProgram.totalDays }
+                { currentProgram.difficultyLevel } Level • { currentProgram.durationDays } Days
+                    </p>
+                    < div className = "flex flex-wrap gap-2" >
+                        <span className="badge bg-blue-50 text-blue-700" >
+                            <Clock size={ 12 } className = "mr-1" /> { currentProgram.durationDays } days
+                                </span>
+                                < span className = "badge bg-purple-50 text-purple-700" >
+                                    Day { progress?.currentDay || 1 } of { currentProgram.durationDays }
     </span>
         </div>
         </div>
@@ -202,14 +195,14 @@ onClick = {() => setActiveLevel('Advanced')}
     variant = "outline"
     onClick = {() => navigate('/today')
 }
-                >
+                                >
     Continue
     </Button>
     </div>
     </CardContent>
     </Card>
     </div>
-      )}
+            )}
 
 {/* Available Programs */ }
 <div>
@@ -224,31 +217,28 @@ onClick = {() => setActiveLevel('Advanced')}
                 <div className="flex flex-col sm:flex-row items-start justify-between" >
                 <div className="flex mb-4 sm:mb-0" >
                 <img
-                          src={ program.thumbnail }
-                          alt = { program.title }
-                          className = "w-20 h-20 rounded-lg object-cover mr-4"
+                                                    src={ program.thumbnailUrl }
+                                                    alt = { program.title }
+                                                    className = "w-20 h-20 rounded-lg object-cover mr-4"
                     />
                     <div>
                     <h3 className="font-medium" > { program.title } </h3>
                 < p className = "text-sm text-gray-500 mb-2" >
-                { program.level } Level • Month { program.month }
+                { program.difficultyLevel } Level • { program.durationDays } Days
                 </p>
                 < div className = "flex flex-wrap gap-2" >
                 <span className="badge bg-blue-50 text-blue-700" >
-                <Clock size={ 12} className = "mr-1" /> { program.totalDuration } minutes
-                </span>
-                < span className = "badge bg-green-50 text-green-700" >
-                <Calendar size={ 12} className = "mr-1" /> { program.totalDays } days
+                <Clock size={ 12} className = "mr-1" /> { program.durationDays } days
                 </span>
                 < span className = "badge bg-indigo-50 text-indigo-700" >
-                { program.category === 'chair-yoga' ? 'Chair Yoga' : 'Tai Chi' }
+                { program.type === ProgramType.ChairYoga ? 'Chair Yoga' : 'Tai Chi' }
                 </span>
                 </div>
                 </div>
                 </div>
 
                 < Button
-                        variant = { progress?.currentProgram === program.id ? 'success' : 'primary'}
+                                                variant = { progress?.currentProgram === program.id ? 'success' : 'primary'}
 onClick = {() => handleProgramStart(program)}
 className = "sm:ml-4"
     >
@@ -258,12 +248,12 @@ className = "sm:ml-4"
 
     < div className = "mt-3" >
         <button
-                        className="flex items-center text-sm text-primary-600 hover:underline"
+                                                className="flex items-center text-sm text-primary-600 hover:underline"
 onClick = {() => {
     // Show program details (in future implementation)
     alert(`Program details for: ${program.title}`);
 }}
-                      >
+                                            >
     See details < ChevronRight size = { 16} className = "ml-1" />
         </button>
         </div>
@@ -272,23 +262,23 @@ onClick = {() => {
         < CardFooter className = "py-3 bg-gray-50 border-t border-gray-100" >
             <div className="flex flex-wrap gap-2" >
             {
-                program.focusAreas.slice(0, 3).map((area, index) => (
+                program.goals.slice(0, 3).map((goal, index) => (
                     <span key= { index } className = "text-xs text-gray-600" >
-                    { area }{ index<Math.min(program.focusAreas.length, 3) - 1 ? ',' : '' }
+                    { goal }{ index<Math.min(program.goals.length, 3) - 1 ? ',' : '' }
                 </span>
                 ))
             }
 {
-    program.focusAreas.length > 3 && (
-        <span className="text-xs text-gray-600" > +{ program.focusAreas.length - 3 } more </span>
-                      )
+    program.goals.length > 3 && (
+        <span className="text-xs text-gray-600" > +{ program.goals.length - 3 } more </span>
+                                            )
 }
 </div>
     </CardFooter>
     </CardContent>
     </Card>
-            ))
-          ) : (
+                        ))
+                    ) : (
     <Card className= "text-center py-8" >
     <CardContent>
     <h3 className="text-xl font-medium text-gray-700 mb-2" > No programs found </h3>
@@ -297,11 +287,11 @@ onClick = {() => {
                 </p>
                 </CardContent>
                 </Card>
-          )}
+                    )}
 </div>
     </div>
     </div>
-  );
+    );
 };
 
 export default Programs;

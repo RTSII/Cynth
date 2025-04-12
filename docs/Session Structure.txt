@@ -1,0 +1,181 @@
+### Full Session Structure
+
+Each full practice session follows this structure:
+
+1. **Welcome & Overview** (1-2 minutes)
+   - Greeting and session introduction
+   - Session goals and benefits
+   - Overview of what to expect
+   - Safety reminders
+
+2. **Centering Practice** (2-3 minutes)
+   - Seated meditation or breathwork
+   - Body awareness exercise
+   - Intention setting
+   - Gentle awakening movements
+
+3. **Warm-Up Sequence** (3-5 minutes)
+   - Gentle mobility exercises
+   - Joint lubrication movements
+   - Breath awareness practice
+   - Gradual movement building
+
+4. **Main Practice** (10-30 minutes)
+   - Core exercises for session theme
+   - Progressive challenge building
+   - Balanced body engagement
+   - Rest periods as appropriate
+
+5. **Cool-Down** (3-5 minutes)
+   - Gentle stretching
+   - Relaxation poses
+   - Breath regulation
+   - Return to neutral position
+
+6. **Closing** (1-2 minutes)
+   - Session benefits reminder
+   - Encouragement and acknowledgment
+   - Practice integration suggestions
+   - Preview of next session
+
+## Instructional Language Guidelines
+
+### Vocabulary Standards
+
+#### Technical Terminology Usage
+
+NOTE: Cynthia (User) is a retired medical professional with extensive knowledge of anatomy and medical terminology. Use proper technical terms to engage users' cognitive abilities. This approach supports the future CynthAI Brain Activity feature that will incorporate mini quiz games/puzzles focused on Science/Medicine subjects.
+
+#### Approved Terminology Examples
+
+| Technical Term | Description for Context |
+|----------------|--------------------------|
+| External rotation | Movement of a limb around its long axis away from the midline |
+| Anterior tilt | Forward tipping movement of the pelvis |
+| Scapular retraction | Drawing shoulder blades together toward spine |
+| Pronate | Rotation of forearm that turns palm downward |
+| Dorsiflexion | Movement that brings top of foot closer to shin |
+
+### Instruction Phrasing
+
+#### Effective Instruction Patterns
+
+- **Action + Body Part + Direction + Quality**
+  - "Perform external rotation of the humerus to 90 degrees of abduction"
+
+- **Preparation + Action + Result**
+  - "Maintaining neutral lumbar spine, engage rectus abdominis during thoracic flexion"
+
+- **Sensory Cue + Action**
+  - "Noting proprioceptive feedback from the ischial tuberosities, initiate anterior pelvic tilt"
+
+#### Instruction Sequence
+
+1. **Orientation**: Where attention should focus
+2. **Action**: What movement to perform
+3. **Refinement**: How to improve the position
+4. **Breath**: Coordination with breathing
+5. **Awareness**: What to notice or feel
+
+#### Safety-Forward Communication
+
+- Precede challenging movements with precautions
+- Offer modification before presenting full pose
+- Use permissive language ("You may feel..." rather than "You will feel...")
+- Include frequent reminders to respect physical limitations
+
+### Encouragement and Motivation
+
+#### Appropriate Encouragement
+
+- Acknowledge effort rather than achievement
+- Recognize progress over perfection
+- Emphasize sensation over appearance
+- Celebrate consistency and commitment
+
+#### Motivational Language
+
+- Focus on functional improvements
+- Connect practice to daily life benefits
+- Acknowledge the challenge while offering support
+- Use inclusive "we" language when appropriate
+
+## Content for Different Progression Levels
+
+### Novice Level Content
+
+#### Exercise Selection
+
+- Basic seated movements
+- Limited range of motion
+- Single-plane movements
+- Bilateral symmetrical movements
+- Extended rest periods
+
+#### Instructional Focus
+
+- Extensive setup guidance
+- Frequent alignment reminders
+- Simplified breathing patterns
+- Clear beginning and end to each movement
+- Emphasis on body awareness
+
+#### Modifications
+
+- Chair with armrests option
+- Reduced range of motion
+- Additional support options
+- Slower pace with more breaks
+- Option to observe complex movements
+
+### Active Level Content
+
+#### Exercise Selection
+
+- Dynamic seated movements
+- Standing with chair support
+- Multi-step movement sequences
+- Unilateral movements
+- Moderate hold durations
+
+#### Instructional Focus
+
+- Refined alignment cues
+- Connected movement sequences
+- Coordinated breath patterns
+- Increased awareness of subtle movements
+- Introduction to energy concepts
+
+#### Modifications
+
+- Options to increase challenge
+- Reduced support variations
+- Extended hold times
+- Increased repetitions
+- Flow between movements
+
+### Advanced Level Content
+
+#### Exercise Selection
+
+- Dynamic transitions
+- Complex movement patterns
+- Longer sequences and flows
+- Balance challenges with support
+- Extended hold durations
+
+#### Instructional Focus
+
+- Subtle alignment refinements
+- Advanced breath coordination
+- Energy flow awareness
+- Integration of multiple principles
+- Deeper mind-body connection
+
+#### Modifications
+
+- Further challenge options
+- Unsupported variations when appropriate
+- Advanced breath techniques
+- Longer practice sequences
+- Deeper exploration of principles

@@ -1,5 +1,4 @@
 import React, { ButtonHTMLAttributes, ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success';
 type ButtonSize = 'sm' | 'md' | 'lg';

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, Calendar, BookOpen, Image, Music, Settings, HelpCircle } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
+import type { UserProfile } from '../contexts/UserContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,21 +11,26 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { userProfile } = useUser();
 
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
-  type TextSizeOption = 'normal' | 'large' | 'extraLarge';
+  // Ensure we have a userProfile
+  if (!userProfile) {
+    return <div>Loading...</div>; // Or redirect to onboarding
+  }
+
+  type TextSizeOption = 'normal' | 'large' | 'extra-large';
 
   // Apply text size from user preferences
   const textSizeClasses: Record<TextSizeOption, string> = {
     normal: '',
     large: 'text-lg',
-    extraLarge: 'text-xl',
+    'extra-large': 'text-xl',
   };
 
   // Apply high contrast if in user preferences
-  const highContrastClass = user.preferences.highContrast ? 'high-contrast' : '';
+  const highContrastClass = userProfile.preferences.highContrast ? 'high-contrast' : '';
 
   // Navigation items
   const navItems = [
@@ -62,7 +68,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [showHelp]);
 
   return (
-    <div className={`min-h-screen bg-neutral-50 flex flex-col ${textSizeClasses[user.preferences.textSize]} ${highContrastClass}`}>
+    <div className={`min-h-screen bg-neutral-50 flex flex-col ${textSizeClasses[userProfile.preferences.textSize]} ${highContrastClass}`}>
       {/* Header */}
       <header className="bg-white border-b border-neutral-200 py-4 px-4 sm:px-6">
         <div className="flex items-center justify-between">

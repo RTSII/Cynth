@@ -1,5 +1,31 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { UserProfile, UserPreferences } from '@/types';
+
+export interface UserPreferences {
+  reminderTime: string;
+  reminderDays: string[];
+  prefersChairYoga: boolean;
+  prefersTaiChi: boolean;
+  musicVolume: number;
+  textSize: 'normal' | 'large' | 'extra-large';
+  highContrast: boolean;
+}
+
+export interface Goal {
+  id: string;
+  name: string;
+  description: string;
+  completed: boolean;
+}
+
+export interface UserProfile {
+  name: string;
+  age: number;
+  level: string;
+  startDate: string;
+  healthConditions: string[];
+  goals: Goal[];
+  preferences: UserPreferences;
+}
 
 // Default user profile specifically for Cynthia
 const defaultUserProfile: UserProfile = {
